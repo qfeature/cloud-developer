@@ -7,9 +7,11 @@ import bodyParser from 'body-parser';
 
 import { V0MODELS } from './controllers/v0/model.index';
 
+require('dotenv').config(); //Allow use of local user account environment variable in config.ts file.
+
 (async () => {
   await sequelize.addModels(V0MODELS);
-  await sequelize.sync();
+  await sequelize.sync(); //Make sure DB is synced with the expected model within sequelize.
 
   const app = express();
   const port = process.env.PORT || 8080; // default port to listen

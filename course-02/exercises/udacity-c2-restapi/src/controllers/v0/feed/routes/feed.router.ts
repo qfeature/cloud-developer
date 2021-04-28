@@ -18,13 +18,43 @@ router.get('/', async (req: Request, res: Response) => {
 
 //@TODO
 //Add an endpoint to GET a specific resource by Primary Key
+//QL
+router.get('/:id', async (req: Request, res: Response) => {
+    let { id } = req.params;
 
+    // check to make sure the id is set
+    if (!id) {
+        return res.status(400).send(`id is required`);
+    }
+
+    const item = await FeedItem.findByPk(id);
+    res.send(item);
+});
+
+// An endpoint to PATCH (i.e. update) an existing record in the DB.
 // update a specific resource
+// QL
 router.patch('/:id', 
     requireAuth, 
     async (req: Request, res: Response) => {
         //@TODO try it yourself
-        res.send(500).send("not implemented")
+        let { id } = req.params;
+
+        // check to make sure the id is set
+        if (!id) {
+            return res.status(400).send(`id is required`);
+        }
+
+        const captionInput = req.body.caption;
+        // check Caption is valid
+        if (!captionInput) {
+            return res.status(400).send({ message: 'Caption is required or malformed' });
+        }
+
+        const item = await FeedItem.update({caption: captionInput}, {
+            where: {id: id}
+        })
+        res.send(item);
 });
 
 
