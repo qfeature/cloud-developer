@@ -28,7 +28,40 @@ import {filterImageFromURL, deleteLocalFiles} from './util/util';
   //   the filtered image file [!!TIP res.sendFile(filteredpath); might be useful]
 
   /**************************************************************************** */
+  // QL
+  // Example: {{host}}/filteredimage?image_url={{URL}}
+  app.get("/filteredimage/", async (req, res) => {
+    // Get the image url passed in from the GET.
+    let { image_url } = req.query;
 
+    // Check image url is provided.
+    if ( !image_url ) {
+      return res.status(400).send('image_url is required');
+    }
+
+    // Check if image url is a valid url.
+    try {
+      let url = new URL(image_url);
+    } catch (err) {
+      let customError = 'There is a problem with the image_url provided.';
+      console.log(`${customError} ${err}.`)
+      return res.status(400).send(`${customError} Please make sure it is a well-formed URL.`);
+    }
+
+    // Pass image url to the filter function for processing.
+    await filterImageFromURL(image_url)
+    .then( (filteredImgPath) => {
+        // Get the result "filteredImgPath" returned from the image filter function 
+        // and call sendFile to send the file to the client (i.e. browser)
+        // and pass in a call back function to delete the file after the send is done.
+        res.status(200).sendFile(filteredImgPath, () => {deleteLocalFiles([filteredImgPath]);});
+    } )
+    .catch( (error) => {
+      let customErr = 'Unsuccessful filter of image.'; 
+      res.status(422).send(`${customErr} Please make sure the url provided is pointing to an image that exists.`);
+      console.log(`${customErr} ${error}.`);
+    } )
+  });
   //! END @TODO1
   
   // Root Endpoint
