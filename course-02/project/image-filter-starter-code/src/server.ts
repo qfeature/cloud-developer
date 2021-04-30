@@ -36,16 +36,16 @@ import {filterImageFromURL, deleteLocalFiles} from './util/util';
 
     // Check image url is provided.
     if ( !image_url ) {
-      return res.status(400).send('image_url is required');
+      return res.status(422).send('image_url not provided');
     }
 
     // Check if image url is a valid url.
     try {
       let url = new URL(image_url);
     } catch (err) {
-      let customError = 'There is a problem with the image_url provided.';
+      let customError = 'Invalid image_url or image_url not provided.';
       console.log(`${customError} ${err}.`)
-      return res.status(400).send(`${customError} Please make sure it is a well-formed URL.`);
+      return res.status(422).send(`${customError}`);
     }
 
     // Pass image url to the filter function for processing.
@@ -57,8 +57,8 @@ import {filterImageFromURL, deleteLocalFiles} from './util/util';
         res.status(200).sendFile(filteredImgPath, () => {deleteLocalFiles([filteredImgPath]);});
     } )
     .catch( (error) => {
-      let customErr = 'Unsuccessful filter of image.'; 
-      res.status(422).send(`${customErr} Please make sure the url provided is pointing to an image that exists.`);
+      let customErr = 'Invalid image_url.'; 
+      res.status(422).send(`${customErr} Make sure the image_url provided is pointing to an image that exists.`);
       console.log(`${customErr} ${error}.`);
     } )
   });
