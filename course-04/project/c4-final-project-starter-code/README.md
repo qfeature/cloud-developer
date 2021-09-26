@@ -26,7 +26,7 @@ You might also store an id of a user who created a TODO item.
 * <a href="https://nodejs.org/en/download/package-manager/" target="_blank">NodeJS</a> version up to 12.xx 
 * Serverless 
    * Create a <a href="https://dashboard.serverless.com/" target="_blank">Serverless account</a> user
-   * Install the Serverless Framework’s CLI  (up to VERSION=2.21.1). Refer to the <a href="https://www.serverless.com/framework/docs/getting-started/" target="_blank">official documentation</a> for more help.
+   * Install the Serverless Frameworkï¿½s CLI  (up to VERSION=2.21.1). Refer to the <a href="https://www.serverless.com/framework/docs/getting-started/" target="_blank">official documentation</a> for more help.
    ```bash
    npm install -g serverless@2.21.1
    serverless --version
@@ -147,7 +147,7 @@ This frontend should work with your serverless application once it is developed,
 
 ```ts
 const apiId = '...' API Gateway id
-export const apiEndpoint = `https://${apiId}.execute-api.us-east-1.amazonaws.com/dev`
+export const apiEndpoint = `https://${apiId}.execute-api.us-west-1.amazonaws.com/dev`
 
 export const authConfig = {
   domain: '...',    // Domain from Auth0
