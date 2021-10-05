@@ -35,11 +35,6 @@ export class TodoAccess {
             }
         }).promise()
 
-        // Get all todos
-        // const result = await this.docClient.scan({
-        //     TableName: this.todosTable
-        // }).promise()
-
         const items = result.Items
         return items as TodoItem[]
     }
@@ -58,7 +53,7 @@ export class TodoAccess {
 
     // update a todo item
     async updateTodo(todoId: string, userId: string, updateItem: TodoUpdate) {
-        logger.info(`Updating a todo item ${todoId} with userId ${userId}`, JSON.stringify(updateItem))
+        logger.info(`Updating a todo item with todoId ${todoId} and userId ${userId}`, JSON.stringify(updateItem))
 
         const result = await this.docClient.update({
             TableName: this.todosTable,
@@ -80,13 +75,13 @@ export class TodoAccess {
     }
 
     // delete a todo item
-    // async deleteTodo(todoId: String) {
-    //     console.log(`Deleting a todo item with id ${todoId}`)
-    //     await this.docClient.delete({
-    //         TableName: this.todosTable,
-    //         Key: {"todoId": todoId}
-    //     }).promise()
-    // }
+    async deleteTodo(todoId: string, userId: string) {
+        logger.info(`Deleting a todo item with todoId ${todoId} and userId ${userId}`)
+        await this.docClient.delete({
+            TableName: this.todosTable,
+            Key: {"todoId": todoId, "userId": userId}
+        }).promise()
+    }
 }
 
 function createDynamoDBClient() {

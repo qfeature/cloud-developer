@@ -41,7 +41,6 @@ export async function createTodo(
 // Update todo item
 export async function updateTodo(todoId: string, userId: string, updateTodoRequest: UpdateTodoRequest)
 {
-    //Note: Should i pass in the userId and match that as well as the todoId?
     await todoAccess.updateTodo(
         todoId,
         userId,
@@ -54,6 +53,6 @@ export async function updateTodo(todoId: string, userId: string, updateTodoReque
 }
 
 // Delete todo item
-// export async function deleteTodo(todoId: String) {
-//     todoAccess.deleteTodo(todoId)
-// }
+export async function deleteTodo(todoId: string, userId: string) {
+    todoAccess.deleteTodo(todoId, userId)
+}
