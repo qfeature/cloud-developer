@@ -18,7 +18,8 @@ export class TodoAccess {
     constructor(
         private readonly docClient: DocumentClient = createDynamoDBClient(),
         private readonly todosTable = process.env.TODOS_TABLE,
-        private readonly todosTableIndex = process.env.TODOS_CREATED_AT_INDEX) {
+        private readonly todosTableIndex = process.env.TODOS_CREATED_AT_INDEX,
+        private readonly bucketName = process.env.ATTACHMENT_S3_BUCKET) {
     }
 
     //get all todo items (for a user)
@@ -81,6 +82,40 @@ export class TodoAccess {
             TableName: this.todosTable,
             Key: {"todoId": todoId, "userId": userId}
         }).promise()
+    }
+
+    // update a todo item URL
+    async updateTodoUrl(todoId: string, userId: string) {
+        logger.info(`Updating a todo item URL for todoId ${todoId} with userId ${userId}`)
+
+        const result = await this.docClient.update({
+            TableName: this.todosTable,
+            Key: {"todoId": todoId, "userId": userId},
+            UpdateExpression: "SET attachmentUrl = :attachmentUrl",
+            ExpressionAttributeValues: {
+                ":attachmentUrl": `https://${this.bucketName}.s3.amazonaws.com/${todoId}`
+            },
+            ReturnValues: "UPDATED_NEW" //"NONE"
+        }).promise()
+
+        logger.info('The updated URL result UPDATED_NEW', JSON.stringify(result))
+    }
+
+    // find a todo item (given todo id and user id)
+    async findTodo(todoId: string, userId: string): Promise<TodoItem> {
+        logger.info(`Looking for a todo item with todoId ${todoId} and userId ${userId}`)
+
+        const result = await this.docClient.get({
+            TableName: this.todosTable,
+            Key: {
+                userId: userId,
+                todoId: todoId
+            }
+        }).promise()
+
+        logger.info('Found a todo item', JSON.stringify(result))
+        
+        return result.Item as TodoItem
     }
 }
 
