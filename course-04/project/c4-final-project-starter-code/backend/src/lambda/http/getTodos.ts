@@ -1,55 +1,35 @@
-// import 'source-map-support/register'
+import 'source-map-support/register'
 
-// import { APIGatewayProxyEvent, APIGatewayProxyResult } from 'aws-lambda'
-// import * as middy from 'middy'
-// import { cors } from 'middy/middlewares'
+import { APIGatewayProxyEvent, APIGatewayProxyResult } from 'aws-lambda'
+import * as middy from 'middy'
+import { cors } from 'middy/middlewares'
 
 import { getTodosForUser } from '../../helpers/todos'
 import { getUserId } from '../utils';
 
-// // TODO: Get all TODO items for a current user
-// export const handler = middy(
-//   async (event: APIGatewayProxyEvent): Promise<APIGatewayProxyResult> => {
-//     // Write your code here
-//     const userId = getUserId(event)
+import { createLogger } from '../../utils/logger'
+const logger = createLogger('GetTodos')
 
-//     const todos = '...'
+// TODO: Get all TODO items for a current user
+export const handler = middy(
+  async (event: APIGatewayProxyEvent): Promise<APIGatewayProxyResult> => {
+    // Write your code here
+    logger.info('Processing GetTodos event', event)
 
-//     return undefined
+    const userId = getUserId(event)
 
-// handler.use(
-//   cors({
-//     credentials: true
-//   })
-// )
+    const todos = await getTodosForUser(userId)
 
-import { APIGatewayProxyHandler, APIGatewayProxyEvent, APIGatewayProxyResult } from 'aws-lambda'
-import 'source-map-support/register'
-//import * as AWS from 'aws-sdk'
+    return {
+      statusCode: 200,
+      body: JSON.stringify({
+        items: todos
+      })
+    }
+})
 
-//const docClient = new AWS.DynamoDB.DocumentClient()
-//const todosTable = process.env.TODOS_TABLE
-
-export const handler: APIGatewayProxyHandler = async (event: APIGatewayProxyEvent): Promise<APIGatewayProxyResult> => {
-  console.log('Processing event: ', event)
-
-  const userId = getUserId(event)
-  const todos = await getTodosForUser(userId)
-
-  /*const result = await docClient.scan({
-    TableName: todosTable
-  }).promise()
-
-  const todos = result.Items*/
-  
-  return {
-    statusCode: 200,
-    headers: {
-      'Access-Control-Allow-Origin': '*',
-      'Access-Control-Allow-Credentials': true
-    },
-    body: JSON.stringify({
-      items: todos
-    })
-  }
-}
+handler.use(
+  cors({
+    credentials: true
+  })
+)
