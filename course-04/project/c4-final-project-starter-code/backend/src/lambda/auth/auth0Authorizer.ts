@@ -56,16 +56,11 @@ export const handler = async (
 
 async function verifyToken(authHeader: string): Promise<JwtPayload> {
   const token = getToken(authHeader)
-
-  //Example check
-  //Note: this is how you would check a dummy token
-  //if (token !== '123')
-  //  throw new Error('Invalid token')
-  //When you fall into here, a request has been authorized
-
   const jwt: Jwt = decode(token, { complete: true }) as Jwt
 
   // TODO: Implement token verification
+  // You should implement it similarly to how it was implemented for the exercise for the lesson 5
+  // You can read more about how to do this here: https://auth0.com/blog/navigating-rs256-and-jwks/
 
   const response = await Axios.get(jwksUrl)
   const jwks = response.data
@@ -82,8 +77,6 @@ async function verifyToken(authHeader: string): Promise<JwtPayload> {
   let certValue = signingKey.x5c[0]
   const cert = `-----BEGIN CERTIFICATE-----\n${certValue}\n-----END CERTIFICATE-----`
 
-  // You should implement it similarly to how it was implemented for the exercise for the lesson 5
-  // You can read more about how to do this here: https://auth0.com/blog/navigating-rs256-and-jwks/
   // If verify does not throw an exception, this means the token is valid.
   return verify(token, cert, {algorithms: ['RS256']}) as JwtPayload
 }
