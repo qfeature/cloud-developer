@@ -53,7 +53,7 @@ export class TodoAccess {
     }
 
     // update a todo item
-    async updateTodo(todoId: string, userId: string, updateItem: TodoUpdate) {
+    async updateTodo(userId: string, todoId: string, updateItem: TodoUpdate) {
         logger.info(`Updating a todo item with todoId ${todoId} and userId ${userId}`, JSON.stringify(updateItem))
 
         const result = await this.docClient.update({

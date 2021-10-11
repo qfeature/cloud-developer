@@ -8,8 +8,13 @@ import { updateTodo } from '../../helpers/todos'
 import { UpdateTodoRequest } from '../../requests/UpdateTodoRequest'
 import { getUserId } from '../utils'
 
+import { createLogger } from '../../utils/logger'
+const logger = createLogger('updateTodo')
+
 export const handler = middy(
   async (event: APIGatewayProxyEvent): Promise<APIGatewayProxyResult> => {
+    logger.info('Processing UpdateTodo event', event)
+
     const todoId = event.pathParameters.todoId
     const updatedTodo: UpdateTodoRequest = JSON.parse(event.body)
     // TODO: Update a TODO item with the provided id using values in the "updatedTodo" object
@@ -24,15 +29,10 @@ export const handler = middy(
     }
 
     const userId = getUserId(event)
-    await updateTodo(todoId, userId, updatedTodo)
+    await updateTodo(userId, todoId, updatedTodo)
 
     return {
         statusCode: 201,
-        // Note needed since we are using middy cors.
-        /*headers: {
-          'Access-Control-Allow-Origin': '*',
-          'Access-Control-Allow-Credentials': true
-        },*/
         body: JSON.stringify({})
     }
 })

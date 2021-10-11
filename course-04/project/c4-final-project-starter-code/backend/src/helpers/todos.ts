@@ -35,10 +35,10 @@ export async function createTodo(createTodoRequest: CreateTodoRequest, userId: s
 }
 
 // Update todo item
-export async function updateTodo(todoId: string, userId: string, updateTodoRequest: UpdateTodoRequest) {
+export async function updateTodo(userId: string, todoId: string, updateTodoRequest: UpdateTodoRequest) {
     await todoAccess.updateTodo(
-        todoId,
         userId,
+        todoId,
         {
             name: updateTodoRequest.name,
             dueDate: updateTodoRequest.dueDate,
