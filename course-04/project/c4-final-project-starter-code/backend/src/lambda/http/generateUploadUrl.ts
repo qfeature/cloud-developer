@@ -7,8 +7,13 @@ import { cors, httpErrorHandler } from 'middy/middlewares'
 import { createAttachmentPresignedUrl } from '../../helpers/todos'
 import { getUserId } from '../utils'
 
+import { createLogger } from '../../utils/logger'
+const logger = createLogger('generateUploadUrl')
+
 export const handler = middy(
   async (event: APIGatewayProxyEvent): Promise<APIGatewayProxyResult> => {
+    logger.info('Processing GenerateUploadUrl event', event)
+
     const todoId = event.pathParameters.todoId
     // TODO: Return a presigned URL to upload a file for a TODO item with the provided id
 
@@ -22,8 +27,9 @@ export const handler = middy(
     }
 
     const userId = getUserId(event)
-    
-    const rsult = await createAttachmentPresignedUrl(todoId, userId)
+    const rsult = await createAttachmentPresignedUrl(userId, todoId)
+    logger.info('Created presigned URL', rsult)
+
     if (!rsult.signedUrl) {
       return {
         statusCode: 404,

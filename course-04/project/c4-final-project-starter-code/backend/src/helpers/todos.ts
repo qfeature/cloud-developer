@@ -1,4 +1,4 @@
-import { TodoAccess } from './todosAcess'
+import { TodosAccess } from './todosAcess'
 import { AttachmentUtils } from './attachmentUtils';
 import { TodoItem } from '../models/TodoItem'
 import { CreateTodoRequest } from '../requests/CreateTodoRequest'
@@ -9,34 +9,37 @@ import * as uuid from 'uuid'
 
 // TODO: Implement businessLogic
 
-const logger = createLogger('Todos')
-const todoAccess = new TodoAccess()
+const logger = createLogger('todos')
+const todosAccess = new TodosAccess()
 
 // Get all todo items (for a user)
 export async function getTodosForUser(userId: string): Promise<TodoItem[]> {
-    return await todoAccess.getTodosForUser(userId)
+    logger.info('Getting todo list for user', userId)
+    return await todosAccess.getTodosForUser(userId)
 }
 
 // Create a group
-export async function createTodo(createTodoRequest: CreateTodoRequest, userId: string): Promise<TodoItem> {
-    logger.info('Creating a todo item.', createTodoRequest)
+export async function createTodo(userId: string, createTodoRequest: CreateTodoRequest): Promise<TodoItem> {
+    logger.info(`Creating a todo item for user ${userId}`, createTodoRequest)
 
     const todoId = uuid.v4() // Unique ID
-    
-    return await todoAccess.createTodo({
+    logger.info('Creating new todo with todoId', todoId)
+
+    return await todosAccess.createTodo({
         userId: userId,
         todoId: todoId,
         createdAt: new Date().toISOString(),
         name: createTodoRequest.name,
         dueDate: createTodoRequest.dueDate,
         done: false,
-        attachmentUrl: '' //QUESTION: how do i fill in this part?
+        attachmentUrl: ''
     })
 }
 
 // Update todo item
 export async function updateTodo(userId: string, todoId: string, updateTodoRequest: UpdateTodoRequest) {
-    await todoAccess.updateTodo(
+    logger.info(`Updating todo with todoId ${todoId} for userId ${userId}`, updateTodoRequest)
+    await todosAccess.updateTodo(
         userId,
         todoId,
         {
@@ -48,23 +51,25 @@ export async function updateTodo(userId: string, todoId: string, updateTodoReque
 }
 
 // Delete todo item
-export async function deleteTodo(todoId: string, userId: string) {
-    todoAccess.deleteTodo(todoId, userId)
+export async function deleteTodo(userId: string, todoId: string) {
+    logger.info('Deleting todo', {"userId": userId, "todoId": todoId})
+    await todosAccess.deleteTodo(userId, todoId)
 }
 
 // Create presigned URL
-export async function createAttachmentPresignedUrl(todoId: string, userId: string) {
-    const todoItem = await todoAccess.findTodo(todoId, userId)
+export async function createAttachmentPresignedUrl(userId: string, todoId: string) {
+    logger.info('Creating attachment presigned URL', {"userId": userId, "todoId": todoId})
+    const todoItem = await todosAccess.findTodo(userId, todoId)
 
     if (!todoItem) {
         return {
             signedUrl: '',
-            error: `No signed URL generated - todo item not found for todoId ${todoId} with userId ${userId}.`
+            error: 'No signed URL generated - todo item not found for todoId and userId combination.'
         }
     }
 
     // save attachment URL for todo item
-    await todoAccess.updateTodoUrl(todoId, userId)
+    await todosAccess.updateTodoUrl(userId, todoId)
 
     // get a presigned URL
     const attachmentUtils = new AttachmentUtils()

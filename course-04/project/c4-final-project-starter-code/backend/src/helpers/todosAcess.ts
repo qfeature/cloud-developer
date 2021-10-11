@@ -1,18 +1,17 @@
-import { createLogger } from '../utils/logger'
 import * as AWS from 'aws-sdk'
 import * as AWSXRay from 'aws-xray-sdk'
 import { DocumentClient } from 'aws-sdk/clients/dynamodb'
+import { createLogger } from '../utils/logger'
 import { TodoItem } from '../models/TodoItem'
 import { TodoUpdate } from '../models/TodoUpdate';
 
 const XAWS = AWSXRay.captureAWS(AWS)
 
-const logger = createLogger('TodosAccess')
-
+const logger = createLogger('todosAccess')
 
 // TODO: Implement the dataLayer logic
 
-export class TodoAccess {
+export class TodosAccess {
 
     // class constructor
     constructor(
@@ -24,7 +23,7 @@ export class TodoAccess {
 
     //get all todo items (for a user)
     async getTodosForUser(userId: string): Promise<TodoItem[]> {
-        console.log(`Getting todo items for user ${userId}`)
+        logger.info('Getting todo items for user', userId)
 
         // Get todos based on user id
         const result = await this.docClient.query({
@@ -76,7 +75,7 @@ export class TodoAccess {
     }
 
     // delete a todo item
-    async deleteTodo(todoId: string, userId: string) {
+    async deleteTodo(userId: string, todoId: string) {
         logger.info(`Deleting a todo item with todoId ${todoId} and userId ${userId}`)
         await this.docClient.delete({
             TableName: this.todosTable,
@@ -85,7 +84,7 @@ export class TodoAccess {
     }
 
     // update a todo item URL
-    async updateTodoUrl(todoId: string, userId: string) {
+    async updateTodoUrl(userId: string, todoId: string) {
         logger.info(`Updating a todo item URL for todoId ${todoId} with userId ${userId}`)
 
         const result = await this.docClient.update({
@@ -102,7 +101,7 @@ export class TodoAccess {
     }
 
     // find a todo item (given todo id and user id)
-    async findTodo(todoId: string, userId: string): Promise<TodoItem> {
+    async findTodo(userId: string, todoId: string): Promise<TodoItem> {
         logger.info(`Looking for a todo item with todoId ${todoId} and userId ${userId}`)
 
         const result = await this.docClient.get({
@@ -121,7 +120,7 @@ export class TodoAccess {
 
 function createDynamoDBClient() {
     if (process.env.IS_OFFLINE) {
-        console.log('Creating a local DynamoDB instance')
+        logger.info('Creating a local DynamoDB instance')
         return new XAWS.DynamoDB.DocumentClient({
             region: 'localhost',
             endpoint: 'http://localhost:8000'

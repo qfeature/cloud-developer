@@ -30,6 +30,7 @@ export const handler = middy(
 
     const userId = getUserId(event)
     await updateTodo(userId, todoId, updatedTodo)
+    logger.info(`Todo item updated for todoId ${todoId} with userId ${userId}`, updatedTodo)
 
     return {
         statusCode: 201,

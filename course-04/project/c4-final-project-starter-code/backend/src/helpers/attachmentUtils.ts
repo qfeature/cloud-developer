@@ -5,8 +5,7 @@ const XAWS = AWSXRay.captureAWS(AWS)
 
 // TODO: Implement the fileStogare logic
 import { createLogger } from '../utils/logger'
-
-const logger = createLogger('AttachmentUtils')
+const logger = createLogger('attachmentUtils')
 
 export class AttachmentUtils {
     constructor(
