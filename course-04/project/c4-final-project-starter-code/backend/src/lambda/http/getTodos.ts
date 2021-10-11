@@ -8,7 +8,7 @@ import { getTodosForUser } from '../../helpers/todos'
 import { getUserId } from '../utils';
 
 import { createLogger } from '../../utils/logger'
-const logger = createLogger('GetTodos')
+const logger = createLogger('getTodos')
 
 // TODO: Get all TODO items for a current user
 export const handler = middy(
