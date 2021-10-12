@@ -4,7 +4,7 @@ import { APIGatewayProxyEvent, APIGatewayProxyResult } from 'aws-lambda'
 import * as middy from 'middy'
 import { cors, httpErrorHandler } from 'middy/middlewares'
 
-import { updateTodo, timeInMs, setLatencyMetric } from '../../helpers/todos'
+import { updateTodo, findTodo, timeInMs, setLatencyMetric } from '../../helpers/todos'
 import { UpdateTodoRequest } from '../../requests/UpdateTodoRequest'
 import { getUserId } from '../utils'
 
@@ -32,6 +32,18 @@ export const handler = middy(
       }
 
       const userId = getUserId(event)
+
+      // Check if todo item belongs to user
+      const todoItem = await findTodo(userId, todoId)
+      if (!todoItem) {
+        return {
+          statusCode: 404,
+          body: JSON.stringify({
+            error: 'Todo not updated. Todo item is not owned by user.'
+          })
+        }
+      }
+
       await updateTodo(userId, todoId, updatedTodo)
       logger.info(`Todo item updated for todoId ${todoId} with userId ${userId}`, updatedTodo)
 

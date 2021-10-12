@@ -60,15 +60,7 @@ export async function deleteTodo(userId: string, todoId: string) {
 // Create presigned URL
 export async function createAttachmentPresignedUrl(userId: string, todoId: string) {
     logger.info('Creating attachment presigned URL', {"userId": userId, "todoId": todoId})
-    const todoItem = await todosAccess.findTodo(userId, todoId)
-
-    if (!todoItem) {
-        return {
-            signedUrl: '',
-            error: 'No signed URL generated - todo item not found for todoId and userId combination.'
-        }
-    }
-
+    
     // save attachment URL for todo item
     await todosAccess.updateTodoUrl(userId, todoId)
 
@@ -76,7 +68,13 @@ export async function createAttachmentPresignedUrl(userId: string, todoId: strin
     const attachmentUtils = new AttachmentUtils()
     const signedUrl = await attachmentUtils.getUploadUrl(todoId);
 
-    return {signedUrl: signedUrl, error: ''}
+    return signedUrl
+}
+
+// find a todo item (given todo id and user id)
+export async function findTodo(userId: string, todoId: string): Promise<TodoItem> {
+    const todoItem = await todosAccess.findTodo(userId, todoId)
+    return todoItem
 }
 
 // Metric: Set latency metric

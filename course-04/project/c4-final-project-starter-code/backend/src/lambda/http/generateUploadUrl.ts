@@ -4,7 +4,7 @@ import { APIGatewayProxyEvent, APIGatewayProxyResult } from 'aws-lambda'
 import * as middy from 'middy'
 import { cors, httpErrorHandler } from 'middy/middlewares'
 
-import { createAttachmentPresignedUrl, timeInMs, setLatencyMetric } from '../../helpers/todos'
+import { createAttachmentPresignedUrl, findTodo, timeInMs, setLatencyMetric } from '../../helpers/todos'
 import { getUserId } from '../utils'
 
 import { createLogger } from '../../utils/logger'
@@ -30,19 +30,20 @@ export const handler = middy(
       }
 
       const userId = getUserId(event)
-      const rsult = await createAttachmentPresignedUrl(userId, todoId)
-      logger.info('Created presigned URL', rsult)
 
-      if (!rsult.signedUrl) {
+      // Check if todo item belongs to user
+      const todoItem = await findTodo(userId, todoId)
+      if (!todoItem) {
         return {
           statusCode: 404,
           body: JSON.stringify({
-            error: rsult.error
+            error: 'No presigned URL created. Todo item is not owned by user.'
           })
         }
       }
 
-      const presignedUrl = rsult.signedUrl
+      const presignedUrl = await createAttachmentPresignedUrl(userId, todoId)
+      logger.info('Created presigned URL', presignedUrl)
 
       return {
           statusCode: 200,

@@ -4,7 +4,7 @@ import { APIGatewayProxyEvent, APIGatewayProxyResult } from 'aws-lambda'
 import * as middy from 'middy'
 import { cors, httpErrorHandler } from 'middy/middlewares'
 
-import { deleteTodo, timeInMs, setLatencyMetric } from '../../helpers/todos'
+import { deleteTodo, findTodo, timeInMs, setLatencyMetric } from '../../helpers/todos'
 import { getUserId } from '../utils'
 
 import { createLogger } from '../../utils/logger'
@@ -30,6 +30,18 @@ export const handler = middy(
       }
 
       const userId = getUserId(event)
+
+      // Check if todo item belongs to user
+      const todoItem = await findTodo(userId, todoId)
+      if (!todoItem) {
+        return {
+          statusCode: 404,
+          body: JSON.stringify({
+            error: 'Todo not deleted. Todo item is not owned by user.'
+          })
+        }
+      }
+
       await deleteTodo(userId, todoId)
       logger.info('Todo item deleted', {"userId": userId, "todoId": todoId})
 
