@@ -9,6 +9,10 @@ plugins:
   - serverless-aws-documentation
   - serverless-pseudo-parameters # Add so I can use AWS variable in this file.
 
+# Create separate zip package for each lambda function when deploying.
+package:
+  individually: true
+
 provider:
   name: aws
   runtime: nodejs12.x
