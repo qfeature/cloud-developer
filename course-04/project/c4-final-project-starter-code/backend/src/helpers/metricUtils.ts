@@ -12,12 +12,11 @@ const cloudwatchNamespace = 'Udacity/ServerlessTodoApp'
 
 export class MetricUtils {
     constructor(
-        private readonly cloudwatch = new XAWS.CloudWatch(), // An instance of CloudWatch
-        private readonly serviceName = 'serverlessTodoAppMetric') {
+        private readonly cloudwatch = new XAWS.CloudWatch()) {
     }
 
-    async setLatencyMetric(totalTime: number) {
-        logger.info('Creating latency metric', totalTime)
+    async setLatencyMetric(serviceName: string, totalTime: number) {
+        logger.info(`Creating latency metric for ${serviceName} with latency ${totalTime} milliseconds`)
 
         // Generating another data point
         await this.cloudwatch.putMetricData({
@@ -27,7 +26,7 @@ export class MetricUtils {
                     Dimensions: [
                         {
                             Name: 'ServiceName',
-                            Value: this.serviceName
+                            Value: serviceName
                         }
                     ],
                     Unit: 'Milliseconds',

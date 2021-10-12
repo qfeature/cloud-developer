@@ -80,9 +80,9 @@ export async function createAttachmentPresignedUrl(userId: string, todoId: strin
 }
 
 // Metric: Set latency metric
-export async function setLatencyMetric(totalTime: number) {
+export async function setLatencyMetric(serviceName: string, totalTime: number) {
     const metricUtils = new MetricUtils()
-    await metricUtils.setLatencyMetric(totalTime)
+    await metricUtils.setLatencyMetric(serviceName, totalTime)
 }
 
 // Metric: Get current time

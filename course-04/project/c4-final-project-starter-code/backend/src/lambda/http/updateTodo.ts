@@ -4,7 +4,7 @@ import { APIGatewayProxyEvent, APIGatewayProxyResult } from 'aws-lambda'
 import * as middy from 'middy'
 import { cors, httpErrorHandler } from 'middy/middlewares'
 
-import { updateTodo } from '../../helpers/todos'
+import { updateTodo, timeInMs, setLatencyMetric } from '../../helpers/todos'
 import { UpdateTodoRequest } from '../../requests/UpdateTodoRequest'
 import { getUserId } from '../utils'
 
@@ -13,28 +13,39 @@ const logger = createLogger('updateTodo')
 
 export const handler = middy(
   async (event: APIGatewayProxyEvent): Promise<APIGatewayProxyResult> => {
-    logger.info('Processing UpdateTodo event', event)
 
-    const todoId = event.pathParameters.todoId
-    const updatedTodo: UpdateTodoRequest = JSON.parse(event.body)
-    // TODO: Update a TODO item with the provided id using values in the "updatedTodo" object
+    const startTime = timeInMs() // Record time start
+    try {
+      logger.info('Processing UpdateTodo event', event)
 
-    if (!todoId) {
-        return {
-          statusCode: 404,
-          body: JSON.stringify({
-            error: 'TodoId not provided'
-          })
-        }
-    }
+      const todoId = event.pathParameters.todoId
+      const updatedTodo: UpdateTodoRequest = JSON.parse(event.body)
+      // TODO: Update a TODO item with the provided id using values in the "updatedTodo" object
 
-    const userId = getUserId(event)
-    await updateTodo(userId, todoId, updatedTodo)
-    logger.info(`Todo item updated for todoId ${todoId} with userId ${userId}`, updatedTodo)
+      if (!todoId) {
+          return {
+            statusCode: 404,
+            body: JSON.stringify({
+              error: 'TodoId not provided'
+            })
+          }
+      }
 
-    return {
-        statusCode: 201,
-        body: JSON.stringify({})
+      const userId = getUserId(event)
+      await updateTodo(userId, todoId, updatedTodo)
+      logger.info(`Todo item updated for todoId ${todoId} with userId ${userId}`, updatedTodo)
+
+      return {
+          statusCode: 201,
+          body: JSON.stringify({})
+      }
+    } catch (e) {
+      logger.error('Update todo item error', { error: e.message })
+      throw new Error(e)
+    } finally {
+      const endTime = timeInMs(); // Record time finished
+      const totalTime = endTime - startTime;
+      await setLatencyMetric('updateTodoMetric', totalTime)
     }
 })
 

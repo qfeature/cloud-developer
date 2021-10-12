@@ -34,7 +34,7 @@ export const handler = middy(
     } finally {
       const endTime = timeInMs(); // Record time finished
       const totalTime = endTime - startTime;
-      await setLatencyMetric(totalTime)
+      await setLatencyMetric('getTodosMetric', totalTime)
     }
 })
 
