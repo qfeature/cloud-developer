@@ -5,6 +5,7 @@ import { CreateTodoRequest } from '../requests/CreateTodoRequest'
 import { UpdateTodoRequest } from '../requests/UpdateTodoRequest'
 import { createLogger } from '../utils/logger'
 import * as uuid from 'uuid'
+import { MetricUtils } from './metricUtils';
 // import * as createError from 'http-errors'
 
 // TODO: Implement businessLogic
@@ -76,4 +77,15 @@ export async function createAttachmentPresignedUrl(userId: string, todoId: strin
     const signedUrl = await attachmentUtils.getUploadUrl(todoId);
 
     return {signedUrl: signedUrl, error: ''}
+}
+
+// Metric: Set latency metric
+export async function setLatencyMetric(totalTime: number) {
+    const metricUtils = new MetricUtils()
+    await metricUtils.setLatencyMetric(totalTime)
+}
+
+// Metric: Get current time
+export function timeInMs() {
+    return new Date().getTime()
 }

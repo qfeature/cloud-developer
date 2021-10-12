@@ -4,7 +4,7 @@ import { APIGatewayProxyEvent, APIGatewayProxyResult } from 'aws-lambda'
 import * as middy from 'middy'
 import { cors, httpErrorHandler } from 'middy/middlewares'
 
-import { getTodosForUser } from '../../helpers/todos'
+import { getTodosForUser, timeInMs, setLatencyMetric } from '../../helpers/todos'
 import { getUserId } from '../utils';
 
 import { createLogger } from '../../utils/logger'
@@ -14,17 +14,27 @@ const logger = createLogger('getTodos')
 export const handler = middy(
   async (event: APIGatewayProxyEvent): Promise<APIGatewayProxyResult> => {
     // Write your code here
-    logger.info('Processing GetTodos event', event)
+    
+    const startTime = timeInMs() // Record time start
+    try { 
+      logger.info('Processing GetTodos event', event)
+      const userId = getUserId(event)
+      const todos = await getTodosForUser(userId)
+      logger.info('Todo list found', todos)
 
-    const userId = getUserId(event)
-    const todos = await getTodosForUser(userId)
-    logger.info('Todo list found', todos)
-
-    return {
-      statusCode: 200,
-      body: JSON.stringify({
-        items: todos
-      })
+      return {
+        statusCode: 200,
+        body: JSON.stringify({
+          items: todos
+        })
+      }
+    } catch (e) {
+      logger.error('Todo list error', { error: e.message })
+      throw new Error(e)
+    } finally {
+      const endTime = timeInMs(); // Record time finished
+      const totalTime = endTime - startTime;
+      await setLatencyMetric(totalTime)
     }
 })
 
